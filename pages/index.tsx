@@ -1,7 +1,6 @@
 import { SubmitHandler, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { GoogleSpreadsheet } from "google-spreadsheet";
 
 type IFormInputs = {
   name: string;
@@ -37,35 +36,12 @@ export default function Home() {
   const onSubmit: SubmitHandler<IFormInputs> = async (data: IFormInputs) => {
     const { name, email, phone } = data;
 
-    // const dataForm = { name, email, phone };
+    const dataForm = { name, email, phone };
 
-    const doc = new GoogleSpreadsheet(
-      "1lh3clShhMk4pU09iFk_olM7ELDTJM9E07_DViCpv0Yo"
-    );
-
-    console.log("doc >>", doc);
-
-    await doc.useServiceAccountAuth({
-      client_email: process.env.NEXT_PUBLIC_CLIENT_EMAIL,
-      private_key: process.env.NEXT_PUBLIC_PRIVATE_KEY,
+    await fetch("/api", {
+      method: "POST",
+      body: JSON.stringify(dataForm),
     });
-
-    await doc.loadInfo();
-
-    const sheet = doc.sheetsByIndex[0];
-
-    console.log("sheet", sheet);
-
-    await sheet.addRow({
-      nome: name,
-      email,
-      telefone: phone,
-    });
-
-    // await fetch("/api", {
-    //   method: "POST",
-    //   body: JSON.stringify(dataForm),
-    // });
   };
 
   return (
