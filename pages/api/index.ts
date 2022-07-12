@@ -1,5 +1,4 @@
 import { GoogleSpreadsheet } from "google-spreadsheet";
-import credentials from "../../credentials/google-sheets-api.json";
 
 export default async function handler(req, res) {
   const { name, email, phone } = JSON.parse(req.body);
@@ -9,8 +8,8 @@ export default async function handler(req, res) {
   );
 
   await doc.useServiceAccountAuth({
-    client_email: credentials.client_email,
-    private_key: credentials.private_key,
+    client_email: process.env.NEXT_PUBLIC_CLIENT_EMAIL,
+    private_key: process.env.NEXT_PUBLIC_PRIVATE_KEY,
   });
 
   await doc.loadInfo();

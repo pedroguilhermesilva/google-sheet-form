@@ -1,37 +1,53 @@
+import { SubmitHandler, useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
+
 type IFormInputs = {
   name: string;
   email: string;
   phone: string;
 };
 
+const schema = yup
+  .object()
+  .shape({
+    name: yup.string().required("Nome não pode ser vazio!"),
+    email: yup
+      .string()
+      .email("Deve ser um email válido!")
+      .required("E-mail não pode ser vazio!"),
+    phone: yup
+      .string()
+      .min(12, "Telefone deve ter pelo menos 12 caracteres")
+      .max(13, "Telefone deve ter no máximo 13 caracteres")
+      .required("Telefone não pode ser vazio"),
+  })
+  .required();
+
 export default function Home() {
-  // const {
-  //   register,
-  //   formState: { errors },
-  //   handleSubmit,
-  // } = useForm<IFormInputs>();
+  const {
+    register,
+    formState: { errors },
+    handleSubmit,
+  } = useForm<IFormInputs>({
+    resolver: yupResolver(schema),
+  });
 
-  // const onSubmit: SubmitHandler<IFormInputs> = async (data: IFormInputs) => {
-  //   // const data = { name, email, phone };
-  //   console.log("data >>>", data);
-  //   console.log("errors >>>", errors);
+  const onSubmit: SubmitHandler<IFormInputs> = async (data: IFormInputs) => {
+    const { name, email, phone } = data;
 
-  //   await fetch("http://localhost:3000/api", {
-  //     method: "POST",
-  //     body: JSON.stringify(data),
-  //   });
-  // };
+    const dataForm = { name, email, phone };
 
-  const handleSubmit = (e) => {
-    e.prevantDefault();
-
-    console.log("teste");
+    await fetch("/api", {
+      method: "POST",
+      body: JSON.stringify(dataForm),
+    });
   };
 
   return (
     <div className="h-screen flex justify-center items-center bg-slate-800">
       <div className="shadow-lg box-border h-auto w-auto sm:w-4/12 p-8 border-2 rounded-md bg-white">
-        <form onSubmit={handleSubmit} className="flex flex-col">
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col">
           <div className="mb-5">
             <label className="block">
               <span className="block text-sm font-medium text-slate-700">
@@ -39,21 +55,26 @@ export default function Home() {
               </span>
             </label>
             <input
-              className="w-full mt-1 px-3 py-2 border border-slate-300 
+              className={`w-full mt-1 px-3 py-2 border border-slate-300 
               rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none
-              focus:border-sky-500 focus:ring-1 focus:ring-sky-500 
               disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200 disabled:shadow-none
-              invalid:border-pink-500 invalid:text-pink-600
-              focus:invalid:border-pink-500 focus:invalid:ring-pink-500"
+              ${
+                errors.name
+                  ? "border-pink-500 text-pink-600 focus:border-pink-500 focus:ring-pink-500"
+                  : "focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+              }`}
               type="text"
               name="name"
               placeholder="Insira seu nome aqui"
+              {...register("name", {
+                required: true,
+              })}
             />
-            {/* {errors && (
+            {errors.name && (
               <p className="mt-2 peer-invalid:visible text-pink-600 text-sm">
-                Please provide a valid email address.
+                {errors.name.message}
               </p>
-            )} */}
+            )}
           </div>
           <div className="mb-5">
             <label className="block">
@@ -62,21 +83,26 @@ export default function Home() {
               </span>
             </label>
             <input
-              className="w-full mt-1 px-3 py-2 border border-slate-300 
+              className={`w-full mt-1 px-3 py-2 border border-slate-300 
               rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none
-              focus:border-sky-500 focus:ring-1 focus:ring-sky-500 
               disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200 disabled:shadow-none
-              invalid:border-pink-500 invalid:text-pink-600
-              focus:invalid:border-pink-500 focus:invalid:ring-pink-500"
+              ${
+                errors.email
+                  ? "border-pink-500 text-pink-600 focus:border-pink-500 focus:ring-pink-500"
+                  : "focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+              }`}
               type="email"
               name="email"
-              placeholder="Insira seu e-mail aqui"
+              placeholder="google-sheet-form@.com"
+              {...register("email", {
+                required: true,
+              })}
             />
-            {/* {errors && (
+            {errors.email && (
               <p className="mt-2 peer-invalid:visible text-pink-600 text-sm">
-                Please provide a valid email address.
+                {errors.email.message}
               </p>
-            )} */}
+            )}
           </div>
           <div className="mb-5">
             <label className="block">
@@ -85,21 +111,26 @@ export default function Home() {
               </span>
             </label>
             <input
-              className="w-full mt-1 px-3 py-2 border border-slate-300 
-              rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none
-              focus:border-sky-500 focus:ring-1 focus:ring-sky-500 
+              className={`w-full mt-1 px-3 py-2 border border-slate-300 
+              rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none 
               disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200 disabled:shadow-none
-              invalid:border-pink-500 invalid:text-pink-600
-              focus:invalid:border-pink-500 focus:invalid:ring-pink-500"
+              ${
+                errors.phone
+                  ? "border-pink-500 text-pink-600 focus:border-pink-500 focus:ring-pink-500"
+                  : "focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+              } `}
               type="phone"
               name="phone"
-              placeholder="Insira seu telefone aqui"
+              placeholder="(00) 00000-0000"
+              {...register("phone", {
+                required: true,
+              })}
             />
-            {/* {errors && (
+            {errors.phone && (
               <p className="mt-2 peer-invalid:visible text-pink-600 text-sm">
-                Please provide a valid email address.
+                {errors.phone.message}
               </p>
-            )} */}
+            )}
           </div>
           <button
             type="submit"
